@@ -1,0 +1,88 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+venv.bak/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+word_learning.db
+
+# Flask
+instance/
+.webassets-cache
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Images (kelime resimleri)
+app/static/word_pics/*
+!app/static/word_pics/.gitkeep
+
+# Debug ve test dosyaları (opsiyonel)
+debug_db.py
+create_test_user.py
+check_duplicates.py
+recreate_db.py
+create_admin.py
+check_words.py
+import_new_words.py
+import_all_words.py
+generate_missing_words.py
+add_new_words.py
+new_words_part*.py
+update_database.py
+add_common_words.py
+simple_update.py
+
+# Secret keys
+config.py
+secrets.txt 

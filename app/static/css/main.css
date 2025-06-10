@@ -1,0 +1,77 @@
+/* Ana CSS Dosyası */
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Ana içerik */
+main {
+    flex: 1;
+}
+
+/* Header ve navbar */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+
+/* Kartlar */
+.card {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.card-header h3, .card-header h4 {
+    margin: 0;
+}
+
+/* Çalışma kartları */
+.study-card {
+    background-color: white;
+    transition: all 0.3s ease;
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+    padding: 1.5rem 0;
+}
+
+/* Formlar */
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Butonlar */
+.btn {
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+}
+
+.btn-success {
+    background-color: #198754;
+}
+
+/* Mobil için */
+@media (max-width: 768px) {
+    .container {
+        width: 100%;
+        padding-right: 15px;
+        padding-left: 15px;
+    }
+} 

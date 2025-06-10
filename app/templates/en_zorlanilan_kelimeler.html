@@ -1,0 +1,55 @@
+<!-- En Zorlandığınız Kelimeler -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">En Zorlandığınız Kelimeler</h4>
+            </div>
+            <div class="card-body">
+                {% if difficult_words %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Kelime</th>
+                                <th>Türkçe Anlamı</th>
+                                <th>Deneme Sayısı</th>
+                                <th>Doğru Sayısı</th>
+                                <th>Başarı Oranı</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in difficult_words %}
+                            <tr>
+                                <td>{{ item.word.eng_word_name }}</td>
+                                <td>{{ item.word.tur_word_name }}</td>
+                                <td>{{ item.attempts }}</td>
+                                <td>{{ item.correct_count }}</td>
+                                <td>
+                                    {% if item.attempts > 0 %}
+                                        {% set success_ratio = ((item.correct_count / item.attempts) * 100)|round %}
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar {{ 'bg-danger' if success_ratio < 30 else 'bg-warning' if success_ratio < 70 else 'bg-success' }}" 
+                                                 role="progressbar" 
+                                                 style="width: {{ success_ratio }}%">
+                                                {{ success_ratio }}%
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">Henüz çalışılmadı</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> Henüz çalışma verisi mevcut değil.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div> 

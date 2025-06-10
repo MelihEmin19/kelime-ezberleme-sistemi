@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white text-center">
+                    <h2 class="mb-0">🎯 Wordle Oyunu</h2>
+                    <p class="mb-0">5 harfli İngilizce kelimeyi 6 denemede tahmin et!</p>
+                </div>
+                <div class="card-body">
+                    <!-- Oyun Kuralları -->
+                    <div class="alert alert-info mb-4">
+                        <h5>📋 Nasıl Oynanır:</h5>
+                        <ul class="mb-0">
+                            <li><strong>Yeşil:</strong> Harf doğru ve doğru yerde</li>
+                            <li><strong>Sarı:</strong> Harf kelimede var ama yanlış yerde</li>
+                            <li><strong>Gri:</strong> Harf kelimede yok</li>
+                        </ul>
+                    </div>
+
+                    <!-- Oyun Tahtası -->
+                    <div class="game-board mb-4">
+                        <div id="game-grid" class="grid-container">
+                            <!-- 6 satır, 5 sütun -->
+                            <div class="grid-row" data-row="0">
+                                <div class="grid-cell" data-col="0"></div>
+                                <div class="grid-cell" data-col="1"></div>
+                                <div class="grid-cell" data-col="2"></div>
+                                <div class="grid-cell" data-col="3"></div>
+                                <div class="grid-cell" data-col="4"></div>
+                            </div>
+                            <div class="grid-row" data-row="1">
+                                <div class="grid-cell" data-col="0"></div>
+                                <div class="grid-cell" data-col="1"></div>
+                                <div class="grid-cell" data-col="2"></div>
+                                <div class="grid-cell" data-col="3"></div>
+                                <div class="grid-cell" data-col="4"></div>
+                            </div>
+                            <div class="grid-row" data-row="2">
+                                <div class="grid-cell" data-col="0"></div>
+                                <div class="grid-cell" data-col="1"></div>
+                                <div class="grid-cell" data-col="2"></div>
+                                <div class="grid-cell" data-col="3"></div>
+                                <div class="grid-cell" data-col="4"></div>
+                            </div>
+                            <div class="grid-row" data-row="3">
+                                <div class="grid-cell" data-col="0"></div>
+                                <div class="grid-cell" data-col="1"></div>
+                                <div class="grid-cell" data-col="2"></div>
+                                <div class="grid-cell" data-col="3"></div>
+                                <div class="grid-cell" data-col="4"></div>
+                            </div>
+                            <div class="grid-row" data-row="4">
+                                <div class="grid-cell" data-col="0"></div>
+                                <div class="grid-cell" data-col="1"></div>
+                                <div class="grid-cell" data-col="2"></div>
+                                <div class="grid-cell" data-col="3"></div>
+                                <div class="grid-cell" data-col="4"></div>
+                            </div>
+                            <div class="grid-row" data-row="5">
+                                <div class="grid-cell" data-col="0"></div>
+                                <div class="grid-cell" data-col="1"></div>
+                                <div class="grid-cell" data-col="2"></div>
+                                <div class="grid-cell" data-col="3"></div>
+                                <div class="grid-cell" data-col="4"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tahmin Girişi -->
+                    <div class="input-section mb-4">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <input type="text" id="guess-input" class="form-control" 
+                                       placeholder="5 harfli kelime girin..." maxlength="5">
+                            </div>
+                            <div class="col-md-4">
+                                <button id="submit-guess" class="btn btn-primary w-100">Tahmin Et</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mesaj Alanı -->
+                    <div id="message-area" class="alert" style="display: none;"></div>
+
+                    <!-- Oyun Durumu -->
+                    <div class="game-status">
+                        <p><strong>Deneme:</strong> <span id="attempt-count">1</span>/6</p>
+                    </div>
+
+                    <!-- Yeni Oyun Butonu -->
+                    <div class="text-center">
+                        <div id="daily-message" class="alert alert-info" style="display: none;">
+                            <h5>🗓️ Günlük Wordle Tamamlandı!</h5>
+                            <p class="mb-0">Yeni kelime için <strong id="tomorrow-date"></strong> tarihini bekleyin.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.grid-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-width: 350px;
+    margin: 0 auto;
+}
+
+.grid-row {
+    display: flex;
+    gap: 5px;
+}
+
+.grid-cell {
+    width: 60px;
+    height: 60px;
+    border: 2px solid #d3d6da;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    text-transform: uppercase;
+    background-color: white;
+    transition: all 0.3s ease;
+}
+
+.grid-cell.correct {
+    background-color: #6aaa64;
+    border-color: #6aaa64;
+    color: white;
+}
+
+.grid-cell.present {
+    background-color: #c9b458;
+    border-color: #c9b458;
+    color: white;
+}
+
+.grid-cell.absent {
+    background-color: #787c7e;
+    border-color: #787c7e;
+    color: white;
+}
+
+.grid-cell.filled {
+    border-color: #878a8c;
+    background-color: #f8f9fa;
+}
+
+#guess-input {
+    text-transform: uppercase;
+    font-size: 18px;
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+.game-status {
+    text-align: center;
+    font-size: 18px;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffeaa7;
+    color: #856404;
+}
+</style>
+
+<script>
+let currentRow = 0;
+let currentCol = 0;
+let gameOver = false;
+let targetWord = '';
+
+document.addEventListener('DOMContentLoaded', function() {
+    const guessInput = document.getElementById('guess-input');
+    const submitButton = document.getElementById('submit-guess');
+    const messageArea = document.getElementById('message-area');
+    const attemptCount = document.getElementById('attempt-count');
+    const dailyMessage = document.getElementById('daily-message');
+    const tomorrowDate = document.getElementById('tomorrow-date');
+
+    // Sayfa yüklendiğinde günün oyunu tamamlanmış mı kontrol et
+    checkDailyStatus();
+
+    // Enter tuşu ile tahmin gönderme
+    guessInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !gameOver) {
+            submitGuess();
+        }
+    });
+
+    // Sadece harf girişine izin ver
+    guessInput.addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^a-zA-Z]/g, '').toUpperCase();
+    });
+
+    submitButton.addEventListener('click', submitGuess);
+
+    function checkDailyStatus() {
+        // LocalStorage'dan bugünün durumunu kontrol et
+        const today = new Date().toISOString().split('T')[0];
+        const dailyStatus = localStorage.getItem('wordle_' + today);
+        
+        if (dailyStatus === 'completed') {
+            gameOver = true;
+            const tomorrowDateStr = localStorage.getItem('wordle_tomorrow_' + today);
+            showDailyCompleted(tomorrowDateStr);
+        }
+    }
+
+    function submitGuess() {
+        const guess = guessInput.value.trim();
+        
+        if (guess.length !== 5) {
+            showMessage('Kelime 5 harfli olmalı!', 'warning');
+            return;
+        }
+
+        if (gameOver) {
+            showMessage('Bugünün Wordle\'ı tamamlandı! Yarın yeni kelime gelecek.', 'warning');
+            return;
+        }
+
+        // Tahmin gönder
+        fetch('/wordle_guess', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({guess: guess})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showMessage(data.error, 'danger');
+                return;
+            }
+
+            // Tahtayı güncelle
+            updateBoard(guess, data.result);
+            
+            if (data.won) {
+                gameOver = true;
+                showMessage(`🎉 Tebrikler! Kelime: ${data.target} (${data.turkish})`, 'success');
+                saveDailyStatus(data.tomorrow_date);
+                showDailyCompleted(data.tomorrow_date);
+            } else if (currentRow >= 5) {
+                gameOver = true;
+                showMessage(`😞 Oyun bitti! Kelime: ${data.target} (${data.turkish})`, 'danger');
+                saveDailyStatus(data.tomorrow_date);
+                showDailyCompleted(data.tomorrow_date);
+            } else {
+                currentRow++;
+                attemptCount.textContent = currentRow + 1;
+            }
+
+            guessInput.value = '';
+            currentCol = 0;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showMessage('Bir hata oluştu!', 'danger');
+        });
+    }
+
+    function saveDailyStatus(tomorrowDateStr) {
+        const today = new Date().toISOString().split('T')[0];
+        localStorage.setItem('wordle_' + today, 'completed');
+        localStorage.setItem('wordle_tomorrow_' + today, tomorrowDateStr);
+    }
+
+    function showDailyCompleted(tomorrowDateStr) {
+        tomorrowDate.textContent = tomorrowDateStr;
+        dailyMessage.style.display = 'block';
+        guessInput.disabled = true;
+        submitButton.disabled = true;
+    }
+
+    function updateBoard(guess, result) {
+        const row = document.querySelector(`[data-row="${currentRow}"]`);
+        const cells = row.querySelectorAll('.grid-cell');
+        
+        for (let i = 0; i < 5; i++) {
+            cells[i].textContent = guess[i];
+            cells[i].classList.add(result[i]);
+            
+            // Animasyon efekti
+            setTimeout(() => {
+                cells[i].style.transform = 'rotateX(360deg)';
+                setTimeout(() => {
+                    cells[i].style.transform = 'rotateX(0deg)';
+                }, 300);
+            }, i * 100);
+        }
+    }
+
+    function showMessage(message, type) {
+        messageArea.textContent = message;
+        messageArea.className = `alert alert-${type}`;
+        messageArea.style.display = 'block';
+        
+        setTimeout(() => {
+            messageArea.style.display = 'none';
+        }, 3000);
+    }
+
+    // Sayfa yüklendiğinde input'a odaklan (eğer oyun devam ediyorsa)
+    if (!gameOver) {
+        guessInput.focus();
+    }
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="fas fa-graduation-cap me-2"></i>Kelime Çalışma</h2>
+        <p class="text-muted">6 Seferli Öğrenme Algoritması ile kelimelerinizi pekiştirin.</p>
+        {% if not request.args.get('answered') %}
+        <div class="alert alert-info" id="algorithm-info">
+            <i class="fas fa-info-circle me-2"></i> <strong>6 Seferli Öğrenme Algoritması:</strong> 
+            Bir kelimeyi tam olarak öğrenmek için 6 kez doğru bilmeniz gerekir. Doğru bildiğiniz her kelime, 
+            artan aralıklarla tekrar karşınıza çıkar: 1 gün sonra, 1 hafta sonra, 1 ay sonra, 3 ay sonra, 6 ay sonra ve 1 yıl sonra.
+            Eğer bir kelimenin doğru cevabını vermezseniz, süreç o kelime için başa döner ve tekrar 6 kez doğru bilmeniz beklenir.
+            Daha detaylı bilgi için <a href="{{ url_for('exam_module') }}" class="alert-link">Sınav Modülü</a> sayfasını ziyaret edin.
+            <button type="button" class="btn-close float-end" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if word_sessions %}
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Bugün Çalışılacak Kelimeler</h4>
+                    <div id="word-progress">
+                        <span id="word-counter">1</span>/<span>{{ word_sessions|length }}</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="words-container">
+                        {% for item in word_sessions %}
+                            <div class="study-card mb-4 p-4 border rounded {% if loop.index0 == 0 %}active{% endif %}" id="word-{{ item.word.id }}" data-index="{{ loop.index0 }}">
+                                <h3 class="text-center mb-3">{{ item.word.eng_word_name }}</h3>
+                                
+                                {% if item.word.picture %}
+                                    <div class="text-center mb-3">
+                                        <img src="{{ url_for('static', filename='word_pics/' + item.word.picture) }}" 
+                                             alt="{{ item.word.eng_word_name }}" 
+                                             class="img-fluid rounded" 
+                                             style="max-height: 200px;">
+                                    </div>
+                                {% endif %}
+                                
+                                <form action="{{ url_for('check_answer', session_id=item.session.id) }}" method="POST" class="mt-4">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Türkçe karşılığını seçin:</label>
+                                        
+                                        <div class="options-container">
+                                            {% for option in item.options %}
+                                                <div class="option-item mb-3">
+                                                    <input class="option-radio" type="radio" name="answer" 
+                                                           id="option-{{ loop.index }}-{{ item.word.id }}" 
+                                                           value="{{ option }}" required>
+                                                    <label class="option-box w-100 p-3 border rounded text-center" 
+                                                           for="option-{{ loop.index }}-{{ item.word.id }}">
+                                                        {{ option }}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-check me-1"></i> Kontrol Et
+                                        </button>
+                                    </div>
+                                </form>
+                                
+                                <div class="mt-3 text-center">
+                                    <small class="text-muted">
+                                        Bu kelimeyi {{ item.session.correct_count }} kez doğru bildiniz.
+                                        {% if item.session.correct_count >= 1 %}
+                                            (6 kez doğru bilmek için {{ 6 - item.session.correct_count }} kez daha)
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="text-center navigation-buttons {% if word_sessions|length <= 1 %}d-none{% endif %}">
+                        <button id="prev-word" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Önceki
+                        </button>
+                        <button id="next-word" class="btn btn-primary">
+                            Sonraki <i class="fas fa-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i> Bugün çalışmanız gereken kelime yok. Yeni kelimeler eklemek için 
+        <a href="{{ url_for('add_word') }}">buraya tıklayın</a>.
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block styles %}
+<style>
+    /* Şık kutularının genel stili */
+    .option-box {
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        background-color: #f8f9fa;
+        font-size: 1.1rem;
+        position: relative;
+        border: 2px solid #dee2e6 !important;
+        border-radius: 8px !important;
+        margin-bottom: 10px;
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    /* Fare üzerine geldiğinde */
+    .option-box:hover {
+        background-color: #e9ecef;
+        border-color: #6c757d !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    /* Radio butonları gizle */
+    .option-radio {
+        position: absolute;
+        opacity: 0;
+        z-index: -1;
+    }
+    
+    /* Seçildiğinde stil - tik işareti yok, sadece açık mavi arka plan */
+    .option-radio:checked + .option-box {
+        background-color: #e7f1ff !important;
+        border-color: #0d6efd !important;
+        color: #000000;
+        font-weight: normal;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+    }
+    
+    /* Navigasyon butonları için stil */
+    .navigation-buttons {
+        margin-top: 20px;
+    }
+    
+    .navigation-buttons button {
+        min-width: 120px;
+        transition: all 0.2s;
+        margin: 0 5px;
+        padding: 8px 15px;
+        border-radius: 20px;
+    }
+    
+    /* Sayaç stili */
+    #word-progress {
+        font-weight: bold;
+        font-size: 1.1rem;
+        background-color: rgba(255,255,255,0.2);
+        padding: 5px 12px;
+        border-radius: 20px;
+        box-shadow: 0 0 5px rgba(0,0,0,0.1) inset;
+    }
+    
+    /* Kelime kartı animasyonu - yeniden düzenlendi */
+    .study-card {
+        display: none;
+        width: 100%;
+    }
+    
+    .study-card.active {
+        display: block;
+    }
+    
+    /* Kelime konteynerı için stil */
+    #words-container {
+        position: relative;
+        min-height: 300px;
+    }
+    
+    /* Kelime başlığı için stil */
+    .study-card h3 {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #0d6efd;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+    }
+    
+    /* Kelime resmi için stil */
+    .study-card img {
+        border: 1px solid #dee2e6;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transition: all 0.3s;
+    }
+    
+    .study-card img:hover {
+        transform: scale(1.03);
+    }
+    
+    /* Kontrol et butonu için stil */
+    .study-card button[type="submit"] {
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.2s;
+    }
+    
+    .study-card button[type="submit"]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Jinja2 değişkenlerini JavaScript'e aktar
+    var appData = {
+        totalWords: {% if word_sessions %}{{ word_sessions|length }}{% else %}0{% endif %}
+    };
+    
+    // Algoritma açıklamasını kapatma fonksiyonu
+    function closeAlgorithmInfo() {
+        var infoBox = document.getElementById('algorithm-info');
+        if (infoBox) {
+            infoBox.style.display = 'none';
+        }
+    }
+    
+    // Kapatma butonuna olay dinleyicisi ekle
+    document.addEventListener('DOMContentLoaded', function() {
+        var closeButton = document.querySelector('#algorithm-info .btn-close');
+        if (closeButton) {
+            closeButton.addEventListener('click', closeAlgorithmInfo);
+        }
+        
+        // Sabit değişkenler
+        var totalWords = appData.totalWords;
+        var currentWordIndex = 0;
+        
+        // URL'den alınan parametreleri kontrol et
+        var urlParams = new URLSearchParams(window.location.search);
+        var isAnswered = urlParams.get('answered');
+        var hasHash = window.location.hash.indexOf('#next-word') === 0;
+        
+        // URL'den gelen current_index parametresini kontrol et
+        var currentIndexParam = urlParams.get('current_index');
+        
+        // Eğer answered parametresi ve geçerli bir current_index varsa, sayacı ayarla
+        if (isAnswered && currentIndexParam) {
+            var parsedIndex = parseInt(currentIndexParam);
+            if (!isNaN(parsedIndex) && parsedIndex >= 0 && parsedIndex < totalWords) {
+                currentWordIndex = parsedIndex;
+                
+                // Eğer #next-word hash'i varsa, sonraki kelimeye geç
+                // (Sadece hash varsa ve belirli koşullar sağlanıyorsa)
+                if (hasHash && isAnswered === '1') {
+                    // Sayfanın ilk yüklenmesi esnasında hash'i temizle - sayacın iki kez artmasını engeller
+                    history.replaceState(null, document.title, window.location.pathname + '?answered=1');
+                    
+                    if (currentWordIndex < totalWords - 1) {
+                        currentWordIndex++;
+                    }
+                }
+            }
+        }
+        
+        // DOM Elementleri
+        var wordCounter = document.getElementById('word-counter');
+        var studyCards = document.querySelectorAll('.study-card');
+        var prevButton = document.getElementById('prev-word');
+        var nextButton = document.getElementById('next-word');
+        
+        // Sayaç güncelleme - sadeleştirildi
+        function updateCounter() {
+            var counterValue = currentWordIndex + 1;
+            if (wordCounter) {
+                wordCounter.textContent = counterValue + '';
+            }
+        }
+        
+        // Aktif kartı göster - basitleştirildi, animasyon kaldırıldı
+        function showActiveCard() {
+            // Önce tüm kartları gizle
+            for (var i = 0; i < studyCards.length; i++) {
+                studyCards[i].classList.remove('active');
+                studyCards[i].style.display = 'none';
+            }
+            
+            // Aktif kartı göster
+            if (studyCards[currentWordIndex]) {
+                var activeCard = studyCards[currentWordIndex];
+                activeCard.classList.add('active');
+                activeCard.style.display = 'block';
+            }
+            
+            // Sayacı güncelle
+            updateCounter();
+        }
+        
+        // Sonraki kelimeye geç
+        function goToNextWord(e) {
+            if (e) e.preventDefault();
+            
+            if (currentWordIndex < totalWords - 1) {
+                currentWordIndex++;
+                showActiveCard();
+                updateNavigationButtons();
+            }
+            return false;
+        }
+        
+        // Önceki kelimeye geç
+        function goToPrevWord(e) {
+            if (e) e.preventDefault();
+            
+            if (currentWordIndex > 0) {
+                currentWordIndex--;
+                showActiveCard();
+                updateNavigationButtons();
+            }
+            return false;
+        }
+        
+        // Navigasyon butonlarını güncelle
+        function updateNavigationButtons() {
+            if (prevButton) {
+                prevButton.disabled = (currentWordIndex <= 0);
+                prevButton.classList.toggle('btn-secondary', currentWordIndex <= 0);
+                prevButton.classList.toggle('btn-primary', currentWordIndex > 0);
+            }
+            
+            if (nextButton) {
+                nextButton.disabled = (currentWordIndex >= totalWords - 1);
+                nextButton.classList.toggle('btn-secondary', currentWordIndex >= totalWords - 1);
+                nextButton.classList.toggle('btn-primary', currentWordIndex < totalWords - 1);
+            }
+        }
+        
+        // Şıkları tıklanabilir hale getir - Radio butonunu değiştir
+        function setupOptionClicks() {
+            var optionBoxes = document.querySelectorAll('.option-box');
+            for (var i = 0; i < optionBoxes.length; i++) {
+                optionBoxes[i].addEventListener('click', function() {
+                    var radioId = this.getAttribute('for');
+                    var radio = document.getElementById(radioId);
+                    
+                    if (radio) {
+                        // Tüm radio butonlarını temizle (aynı form içinde)
+                        var form = this.closest('form');
+                        var allRadios = form.querySelectorAll('input[type="radio"]');
+                        for (var j = 0; j < allRadios.length; j++) {
+                            allRadios[j].checked = false;
+                        }
+                        
+                        // Bu radio butonunu seç
+                        radio.checked = true;
+                    }
+                });
+            }
+        }
+        
+        // Form submit işlemlerini yakala ve sayfa geçişleri için current_index parametresi ekle
+        function setupFormSubmissions() {
+            var forms = document.querySelectorAll('.study-card form');
+            for (var i = 0; i < forms.length; i++) {
+                forms[i].addEventListener('submit', function(e) {
+                    // Form gönderilirken, mevcut kelime indeksini bir parametre olarak ekleyelim
+                    var currentAction = this.action;
+                    var separator = currentAction.includes('?') ? '&' : '?';
+                    this.action = currentAction + separator + 'current_index=' + currentWordIndex;
+                });
+            }
+        }
+        
+        // Sayfa ilk yüklendiğinde yapılacaklar
+        function initPage() {
+            // İlk yüklemede tüm kartları gizle, sadece ilk kartı göster
+            for (var i = 0; i < studyCards.length; i++) {
+                if (i === currentWordIndex) {
+                    studyCards[i].classList.add('active');
+                    studyCards[i].style.display = 'block';
+                } else {
+                    studyCards[i].classList.remove('active');
+                    studyCards[i].style.display = 'none';
+                }
+            }
+            
+            // Sayacı güncelle
+            updateCounter();
+            
+            // Navigasyon butonlarını güncelle
+            updateNavigationButtons();
+            
+            // Şık tıklama olaylarını ayarla
+            setupOptionClicks();
+            
+            // Form gönderimlerini ayarla
+            setupFormSubmissions();
+        }
+        
+        // Buton olay dinleyicileri
+        if (nextButton) {
+            nextButton.addEventListener('click', goToNextWord);
+        }
+        
+        if (prevButton) {
+            prevButton.addEventListener('click', goToPrevWord);
+        }
+        
+        // Klavye kısayolları
+        document.addEventListener('keydown', function(event) {
+            // Input veya textarea'da değilsek
+            if (event.target.tagName.toLowerCase() !== 'input' && 
+                event.target.tagName.toLowerCase() !== 'textarea') {
+                
+                if (event.key === 'ArrowRight') {
+                    event.preventDefault();
+                    goToNextWord();
+                }
+                
+                if (event.key === 'ArrowLeft') {
+                    event.preventDefault();
+                    goToPrevWord();
+                }
+                
+                // 1-4 tuşları ile şıkları seçme
+                if (['1', '2', '3', '4'].includes(event.key)) {
+                    event.preventDefault();
+                    var optionIndex = parseInt(event.key) - 1;
+                    var currentCard = studyCards[currentWordIndex];
+                    
+                    if (currentCard) {
+                        var options = currentCard.querySelectorAll('.option-radio');
+                        if (options.length > optionIndex) {
+                            options[optionIndex].checked = true;
+                        }
+                    }
+                }
+            }
+        });
+        
+        // İlk çalıştırma
+        initPage();
+    });
+</script>
+{% endblock %} 

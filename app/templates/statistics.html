@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2><i class="fas fa-chart-line me-2"></i>İstatistikler ve Analiz</h2>
+        <p class="text-muted">Kelime öğrenme ilerlemenizi detaylı olarak takip edin.</p>
+    </div>
+</div>
+
+<!-- Özet İstatistikler -->
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="card text-center h-100 border-primary">
+            <div class="card-body">
+                <h5 class="card-title text-primary">Toplam Kelime</h5>
+                <h1 class="display-4">{{ total_words }}</h1>
+                <p class="card-text">Sisteme eklediğiniz toplam kelime sayısı</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-center h-100 border-success">
+            <div class="card-body">
+                <h5 class="card-title text-success">Öğrenilen Kelimeler</h5>
+                <h1 class="display-4">{{ learned_words }}</h1>
+                <p class="card-text">6 kez doğru cevaplayarak öğrendiğiniz kelimeler</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-center h-100 border-warning">
+            <div class="card-body">
+                <h5 class="card-title text-warning">Öğrenme Aşamasında</h5>
+                <h1 class="display-4">{{ in_progress }}</h1>
+                <p class="card-text">Halen çalışmakta olduğunuz kelimeler</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-center h-100 border-info">
+            <div class="card-body">
+                <h5 class="card-title text-info">Son 7 Günde</h5>
+                <h1 class="display-4">{{ recent_learned }}</h1>
+                <p class="card-text">Son bir haftada öğrendiğiniz kelime sayısı</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Başarı Oranı -->
+<div class="row mb-4">
+    <div class="col-md-6 offset-md-3">
+        <div class="card h-100">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">Öğrenme Başarı Oranı</h4>
+            </div>
+            <div class="card-body">
+                <div class="progress" style="height: 30px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ success_rate }}%">
+                        {{ '%.1f'|format(success_rate) }}%
+                    </div>
+                </div>
+                <div class="mt-3 text-center">
+                    <p>Toplam kelimelerinizin öğrenme oranı</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if learned_words > 0 %}
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="alert alert-success">
+            <i class="fas fa-trophy me-2"></i> Tebrikler! Şimdiye kadar {{ learned_words }} kelimeyi başarıyla öğrendiniz.
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %} 
