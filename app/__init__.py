@@ -30,7 +30,7 @@ def create_app():
     # Initialize extensions
     db.init_app(app)
     login_manager.init_app(app)
-    login_manager.login_view = 'login'
+    login_manager.login_view = 'main.login'
     login_manager.login_message = 'Bu sayfaya erişmek için lütfen giriş yapın.'
     login_manager.login_message_category = 'info'
 

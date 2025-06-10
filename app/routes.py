@@ -168,7 +168,7 @@ def exam_module():
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     
     form = RegistrationForm()
     if form.validate_on_submit():
@@ -177,14 +177,14 @@ def register():
         db.session.add(user)
         db.session.commit()
         flash('Hesabınız başarıyla oluşturuldu!', 'success')
-        return redirect(url_for('login'))
+        return redirect(url_for('main.login'))
     
     return render_template('register.html', title='Kayıt Ol', form=form)
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     
     form = LoginForm()
     if form.validate_on_submit():
@@ -192,7 +192,7 @@ def login():
         if user and user.check_password(form.password.data):
             login_user(user)
             next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('index'))
+            return redirect(next_page) if next_page else redirect(url_for('main.index'))
         flash('Giriş başarısız. Lütfen kullanıcı adı ve şifrenizi kontrol edin.', 'danger')
     
     return render_template('login.html', title='Giriş Yap', form=form)
@@ -200,19 +200,19 @@ def login():
 @bp.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('index'))
+    return redirect(url_for('main.index'))
 
 @bp.route('/reset_password_request', methods=['GET', 'POST'])
 def reset_password_request():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     
     form = ResetPasswordRequestForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user:
             flash('Şifre sıfırlama talimatları için e-posta adresinizi kontrol edin.', 'info')
-            return redirect(url_for('login'))
+            return redirect(url_for('main.login'))
         flash('Bu kullanıcı adıyla kayıtlı bir hesap bulunamadı.', 'warning')
     
     return render_template('reset_password_request.html', title='Şifre Sıfırlama', form=form)
@@ -245,16 +245,17 @@ def add_word():
         db.session.add(word)
         db.session.commit()
         flash('Kelime başarıyla eklendi!', 'success')
-        return redirect(url_for('words'))
+        return redirect(url_for('main.words'))
     
     return render_template('add_word.html', title='Kelime Ekle', form=form)
 
 def save_picture(form_picture):
     """Yüklenen resmi kaydeder ve dosya adını döndürür"""
+    from flask import current_app
     random_hex = secrets.token_hex(8)
     _, f_ext = os.path.splitext(form_picture.filename)
     picture_fn = random_hex + f_ext
-    picture_path = os.path.join(bp.root_path, 'static/word_pics', picture_fn)
+    picture_path = os.path.join(current_app.root_path, 'static/word_pics', picture_fn)
     
     os.makedirs(os.path.dirname(picture_path), exist_ok=True)
     form_picture.save(picture_path)
@@ -267,7 +268,7 @@ def word_detail(word_id):
     # Admin'in kelimelerine de erişim izni ver
     if word.user_id != current_user.id and word.user_id != 1:
         flash('Bu kelimeyi görüntüleme yetkiniz yok.', 'danger')
-        return redirect(url_for('words'))
+        return redirect(url_for('main.words'))
     
     form = WordSampleForm()
     if form.validate_on_submit():
@@ -278,7 +279,7 @@ def word_detail(word_id):
         db.session.add(sample)
         db.session.commit()
         flash('Örnek cümle başarıyla eklendi!', 'success')
-        return redirect(url_for('word_detail', word_id=word.id))
+        return redirect(url_for('main.word_detail', word_id=word.id))
     
     return render_template('word_detail.html', title=word.eng_word_name, word=word, form=form)
 
@@ -322,7 +323,7 @@ def check_answer(session_id):
     session = StudySession.query.get_or_404(session_id)
     if session.user_id != current_user.id:
         flash('Bu çalışma oturumuna erişim yetkiniz yok.', 'danger')
-        return redirect(url_for('study'))
+        return redirect(url_for('main.study'))
     
     word = Word.query.get(session.word_id)
     user_answer = request.form.get('answer', '').strip()
@@ -348,7 +349,7 @@ def check_answer(session_id):
         session.next_review_date = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
     
     db.session.commit()
-    return redirect(url_for('study'))
+    return redirect(url_for('main.study'))
 
 @bp.route('/statistics')
 @login_required
@@ -401,7 +402,7 @@ def settings():
         current_user.notification_enabled = form.notification_enabled.data
         db.session.commit()
         flash('Ayarlarınız güncellendi!', 'success')
-        return redirect(url_for('settings'))
+        return redirect(url_for('main.settings'))
     
     return render_template('settings.html', title='Ayarlar', form=form)
 
