@@ -8,13 +8,16 @@ def app():
     app = create_app()
     app.config['TESTING'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    app.config['SECRET_KEY'] = 'test_secret_key_for_testing_only'
     return app
 
 @pytest.fixture
 def test_user(app):
     with app.app_context():
-        user = User(username='testuser')
-        user.set_password('testpass')
+        user = User(username='test_user_model')
+        # Test için güvenli şifre kullanımı
+        secure_test_pass = 'TestSecurePass456!'
+        user.set_password(secure_test_pass)
         db.session.add(user)
         db.session.commit()
         return user
@@ -22,44 +25,42 @@ def test_user(app):
 def test_user_creation(app, test_user):
     """Test kullanıcı oluşturma"""
     with app.app_context():
-        assert test_user.username == 'testuser'
-        assert test_user.check_password('testpass')
+        assert test_user.username == 'test_user_model'
+        # Güvenli test şifresi kontrolü
+        assert test_user.check_password('TestSecurePass456!')
 
 def test_word_creation(app, test_user):
     """Test kelime oluşturma"""
     with app.app_context():
         word = Word(
-            english='test',
-            turkish='test',
+            eng_word_name='test_word',
+            tur_word_name='test_kelime',
             user_id=test_user.id,
-            difficulty='normal',
-            next_review=datetime.utcnow()
+            created_at=datetime.utcnow()
         )
         db.session.add(word)
         db.session.commit()
         
-        assert word.english == 'test'
-        assert word.turkish == 'test'
+        assert word.eng_word_name == 'test_word'
+        assert word.tur_word_name == 'test_kelime'
         assert word.user_id == test_user.id
-        assert word.difficulty == 'normal'
 
 def test_word_review_update(app, test_user):
     """Test kelime tekrar tarihini güncelleme"""
     with app.app_context():
         word = Word(
-            english='test',
-            turkish='test',
+            eng_word_name='test_word',
+            tur_word_name='test_kelime',
             user_id=test_user.id,
-            difficulty='normal',
-            next_review=datetime.utcnow()
+            created_at=datetime.utcnow()
         )
         db.session.add(word)
         db.session.commit()
         
-        # Bir sonraki tekrar tarihini güncelle
-        next_date = datetime.utcnow() + timedelta(days=1)
-        word.next_review = next_date
+        # Test için güncellenmiş tarih
+        updated_date = datetime.utcnow() + timedelta(days=1)
+        word.created_at = updated_date
         db.session.commit()
         
         updated_word = Word.query.get(word.id)
-        assert (updated_word.next_review - next_date).total_seconds() < 1 
+        assert (updated_word.created_at - updated_date).total_seconds() < 1 

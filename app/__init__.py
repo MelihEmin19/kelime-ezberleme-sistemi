@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from sqlalchemy import inspect
 from datetime import datetime
+import os
 
 # Constants
 DEFAULT_DAILY_WORD_LIMIT = 5
@@ -15,8 +16,15 @@ login_manager = LoginManager()
 def create_app():
     """Create and configure the Flask application."""
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'your_secret_key_here'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///word_learning.db'
+    
+    # Güvenli SECRET_KEY yapılandırması
+    secret_key = os.environ.get('SECRET_KEY')
+    if not secret_key:
+        # Development için fallback, production'da mutlaka environment variable kullanılmalı
+        secret_key = 'dev-key-change-in-production-' + str(hash('kelime-ezberleme'))
+    
+    app.config['SECRET_KEY'] = secret_key
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///word_learning.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # Initialize extensions
@@ -33,7 +41,9 @@ def create_app():
 
     # Import and register routes and models
     with app.app_context():
-        from app import routes, models
+        from app import models
+        from app.routes import bp
+        app.register_blueprint(bp)
         initialize_database()
 
     return app

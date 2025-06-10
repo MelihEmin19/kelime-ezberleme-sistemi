@@ -1,4 +1,4 @@
-from flask import render_template, url_for, flash, redirect, request, jsonify, current_app
+from flask import render_template, url_for, flash, redirect, request, jsonify, Blueprint
 from . import db
 from .forms import (RegistrationForm, LoginForm, ResetPasswordRequestForm,
                       WordForm, WordSampleForm, SettingsForm)
@@ -10,6 +10,9 @@ import secrets
 import random
 import hashlib
 from sqlalchemy.sql import func
+
+# Blueprint oluşturma
+bp = Blueprint('main', __name__)
 
 # Constants - Magic numbers'ları constants'a çevirdim
 LEARNING_COMPLETE_COUNT = 6
@@ -131,12 +134,12 @@ def calculate_wordle_result(guess, target_word):
     
     return result
 
-@current_app.route('/')
-@current_app.route('/index')
+@bp.route('/')
+@bp.route('/index')
 def index():
     return render_template('index.html', title='Ana Sayfa')
 
-@current_app.route('/exam_module')
+@bp.route('/exam_module')
 def exam_module():
     algorithm_steps = [
         {
@@ -162,7 +165,7 @@ def exam_module():
                           algorithm_steps=algorithm_steps, 
                           exam_rules=exam_rules)
 
-@current_app.route('/register', methods=['GET', 'POST'])
+@bp.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
@@ -178,7 +181,7 @@ def register():
     
     return render_template('register.html', title='Kayıt Ol', form=form)
 
-@current_app.route('/login', methods=['GET', 'POST'])
+@bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
@@ -194,12 +197,12 @@ def login():
     
     return render_template('login.html', title='Giriş Yap', form=form)
 
-@current_app.route('/logout')
+@bp.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('index'))
 
-@current_app.route('/reset_password_request', methods=['GET', 'POST'])
+@bp.route('/reset_password_request', methods=['GET', 'POST'])
 def reset_password_request():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
@@ -214,7 +217,7 @@ def reset_password_request():
     
     return render_template('reset_password_request.html', title='Şifre Sıfırlama', form=form)
 
-@current_app.route('/words')
+@bp.route('/words')
 @login_required
 def words():
     # Admin'in kelimelerini de göster (ID: 1)
@@ -223,7 +226,7 @@ def words():
     ).all()
     return render_template('words.html', title='Kelimelerim', words=user_words)
 
-@current_app.route('/add_word', methods=['GET', 'POST'])
+@bp.route('/add_word', methods=['GET', 'POST'])
 @login_required
 def add_word():
     form = WordForm()
@@ -251,13 +254,13 @@ def save_picture(form_picture):
     random_hex = secrets.token_hex(8)
     _, f_ext = os.path.splitext(form_picture.filename)
     picture_fn = random_hex + f_ext
-    picture_path = os.path.join(current_app.root_path, 'static/word_pics', picture_fn)
+    picture_path = os.path.join(bp.root_path, 'static/word_pics', picture_fn)
     
     os.makedirs(os.path.dirname(picture_path), exist_ok=True)
     form_picture.save(picture_path)
     return picture_fn
 
-@current_app.route('/word/<int:word_id>', methods=['GET', 'POST'])
+@bp.route('/word/<int:word_id>', methods=['GET', 'POST'])
 @login_required
 def word_detail(word_id):
     word = Word.query.get_or_404(word_id)
@@ -279,7 +282,7 @@ def word_detail(word_id):
     
     return render_template('word_detail.html', title=word.eng_word_name, word=word, form=form)
 
-@current_app.route('/study')
+@bp.route('/study')
 @login_required
 def study():
     today_start, today_end = get_today_boundaries()
@@ -313,7 +316,7 @@ def study():
     
     return render_template('study.html', title='Kelime Çalışma', word_sessions=today_words)
 
-@current_app.route('/check_answer/<int:session_id>', methods=['POST'])
+@bp.route('/check_answer/<int:session_id>', methods=['POST'])
 @login_required
 def check_answer(session_id):
     session = StudySession.query.get_or_404(session_id)
@@ -347,7 +350,7 @@ def check_answer(session_id):
     db.session.commit()
     return redirect(url_for('study'))
 
-@current_app.route('/statistics')
+@bp.route('/statistics')
 @login_required
 def statistics():
     # Admin'in kelimelerini de dahil et
@@ -384,7 +387,7 @@ def statistics():
         recent_learned=recent_learned
     )
 
-@current_app.route('/settings', methods=['GET', 'POST'])
+@bp.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
     form = SettingsForm()
@@ -402,12 +405,12 @@ def settings():
     
     return render_template('settings.html', title='Ayarlar', form=form)
 
-@current_app.route('/wordle')
+@bp.route('/wordle')
 @login_required
 def wordle():
     return render_template('wordle.html', title='Wordle Oyunu')
 
-@current_app.route('/wordle_guess', methods=['POST'])
+@bp.route('/wordle_guess', methods=['POST'])
 @login_required
 def wordle_guess():
     data = request.get_json()
