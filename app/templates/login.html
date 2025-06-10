@@ -1,15 +1,18 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-6 offset-md-3">
+<div class="row justify-content-center">
+    <div class="col-md-6">
         <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h3 class="mb-0"><i class="fas fa-sign-in-alt me-2"></i>Giriş Yap</h3>
+            <div class="card-header">
+                <h3 class="card-title text-center">
+                    <i class="fas fa-sign-in-alt me-2"></i>Giriş Yap
+                </h3>
             </div>
             <div class="card-body">
                 <form method="POST" action="">
                     {{ form.hidden_tag() }}
+                    
                     <div class="mb-3">
                         {{ form.username.label(class="form-label") }}
                         {% if form.username.errors %}
@@ -23,6 +26,7 @@
                             {{ form.username(class="form-control") }}
                         {% endif %}
                     </div>
+                    
                     <div class="mb-3">
                         {{ form.password.label(class="form-label") }}
                         {% if form.password.errors %}
@@ -36,18 +40,20 @@
                             {{ form.password(class="form-control") }}
                         {% endif %}
                     </div>
-                    <div class="mb-3">
-                        {{ form.submit(class="btn btn-primary w-100") }}
+                    
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary") }}
                     </div>
                 </form>
-                <div class="text-center mt-3">
-                    <a href="{{ url_for('reset_password_request') }}">Şifremi Unuttum</a>
+                
+                <hr>
+                <div class="text-center">
+                    <a href="{{ url_for('main.reset_password_request') }}">Şifremi Unuttum</a>
                 </div>
-            </div>
-            <div class="card-footer text-center">
-                <small class="text-muted">
-                    Hesabınız yok mu? <a href="{{ url_for('register') }}">Kayıt Ol</a>
-                </small>
+                
+                <div class="text-center mt-3">
+                    Hesabınız yok mu? <a href="{{ url_for('main.register') }}">Kayıt Ol</a>
+                </div>
             </div>
         </div>
     </div>

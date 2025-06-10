@@ -1,114 +1,83 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="jumbotron p-5 mb-4 bg-light rounded-3">
-    <div class="container py-5">
-        <h1 class="display-4">Kelime Ezberleme Sistemi</h1>
-        <p class="lead">Etkili ve kalıcı yabancı dil kelime öğrenme platformuna hoş geldiniz!</p>
-        <hr class="my-4">
-        <p>Bu platform, 6 Seferli Öğrenme Algoritması ile kelimeleri uzun süreli hafızanıza yerleştirmenizi sağlar.</p>
+<div class="row">
+    <div class="col-lg-8 mx-auto text-center">
+        <h1 class="display-4 mb-4">Kelime Ezberleme Sistemi</h1>
+        <p class="lead mb-5">İngilizce kelimelerinizi öğrenin ve unutmayın!</p>
         {% if current_user.is_authenticated %}
-            <a class="btn btn-primary btn-lg" href="{{ url_for('study') }}" role="button">
-                <i class="fas fa-graduation-cap me-2"></i>Hemen Çalışmaya Başla
-            </a>
-            <a class="btn btn-outline-primary btn-lg" href="{{ url_for('exam_module') }}" role="button">
-                <i class="fas fa-book-reader me-2"></i>Sınav Modülünü İncele
-            </a>
+        <a class="btn btn-primary btn-lg" href="{{ url_for('main.study') }}" role="button">
+            <i class="fas fa-book-open me-2"></i>Çalışmaya Başla
+        </a>
+        <a class="btn btn-outline-primary btn-lg" href="{{ url_for('main.exam_module') }}" role="button">
+            <i class="fas fa-info-circle me-2"></i>Nasıl Çalışır?
+        </a>
         {% else %}
-            <a class="btn btn-primary btn-lg" href="{{ url_for('register') }}" role="button">
-                <i class="fas fa-user-plus me-2"></i>Üye Ol
-            </a>
-            <a class="btn btn-outline-primary btn-lg" href="{{ url_for('login') }}" role="button">
-                <i class="fas fa-sign-in-alt me-2"></i>Giriş Yap
-            </a>
+        <a class="btn btn-primary btn-lg" href="{{ url_for('main.register') }}" role="button">
+            <i class="fas fa-user-plus me-2"></i>Kayıt Ol
+        </a>
+        <a class="btn btn-outline-primary btn-lg" href="{{ url_for('main.login') }}" role="button">
+            <i class="fas fa-sign-in-alt me-2"></i>Giriş Yap
+        </a>
         {% endif %}
     </div>
 </div>
 
-<div class="row mb-4">
-    <div class="col-md-4 mb-4">
+<div class="row mt-5">
+    <div class="col-md-4">
         <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title"><i class="fas fa-sync-alt me-2 text-primary"></i>6 Seferli Öğrenme Algoritması</h5>
-                <p class="card-text">Bilimsel olarak kanıtlanmış tekrarlama algoritması ile kelimeleri kalıcı olarak öğrenin. Aralıklı tekrar sistemi, kelimeleri uzun süreli hafızanıza yerleştirir.</p>
-                <a href="{{ url_for('exam_module') }}" class="btn btn-sm btn-outline-primary">Algoritma Hakkında</a>
+            <div class="card-body text-center">
+                <i class="fas fa-brain fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">6 Seferli Algoritma</h5>
+                <p class="card-text">Bilimsel aralıklarla kelimelerinizi öğrenin ve unutmayın. (1 gün, 1 hafta, 1 ay, 3 ay, 6 ay, 1 yıl)</p>
+                <a href="{{ url_for('main.exam_module') }}" class="btn btn-sm btn-outline-primary">Algoritma Hakkında</a>
             </div>
         </div>
     </div>
-    <div class="col-md-4 mb-4">
+    <div class="col-md-4">
         <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title"><i class="fas fa-language me-2 text-success"></i>Kişiselleştirilmiş Çalışma</h5>
-                <p class="card-text">Kendi kelime listenizi oluşturun, görsellerle zenginleştirin ve günlük çalışma hedeflerinizi belirleyin. İlerlemenizi detaylı raporlarla takip edin.</p>
-                <a href="{{ url_for('words') if current_user.is_authenticated else url_for('register') }}" class="btn btn-sm btn-outline-success">Kelime Ekle</a>
+            <div class="card-body text-center">
+                <i class="fas fa-plus-circle fa-3x text-success mb-3"></i>
+                <h5 class="card-title">Kelime Ekle</h5>
+                <p class="card-text">İngilizce-Türkçe kelime çiftlerinizi sisteme ekleyin. Görsel desteği ile daha etkili öğrenin.</p>
+                <a href="{{ url_for('main.words') if current_user.is_authenticated else url_for('main.register') }}" class="btn btn-sm btn-outline-success">Kelime Ekle</a>
             </div>
         </div>
     </div>
-    <div class="col-md-4 mb-4">
+    <div class="col-md-4">
         <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title"><i class="fas fa-chart-line me-2 text-danger"></i>İlerleme Takibi</h5>
-                <p class="card-text">Her kelime için öğrenme durumunuzu ve başarı oranınızı görebilirsiniz. Sistemimiz, bildiğiniz ve tekrarlamanız gereken kelimeleri otomatik olarak belirler.</p>
-                <a href="{{ url_for('statistics') if current_user.is_authenticated else url_for('register') }}" class="btn btn-sm btn-outline-danger">İstatistiklerim</a>
+            <div class="card-body text-center">
+                <i class="fas fa-chart-line fa-3x text-danger mb-3"></i>
+                <h5 class="card-title">İlerleme Takibi</h5>
+                <p class="card-text">Öğrenme ilerlemenizi takip edin. Hangi kelimelerinizin ne durumda olduğunu görün.</p>
+                <a href="{{ url_for('main.statistics') if current_user.is_authenticated else url_for('main.register') }}" class="btn btn-sm btn-outline-danger">İstatistiklerim</a>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Sınav Modülü Tanıtımı -->
-<div class="row mb-5">
-    <div class="col-12">
-        <div class="card border-primary">
-            <div class="card-header bg-primary text-white">
-                <h3 class="mb-0"><i class="fas fa-book-reader me-2"></i>Sınav Modülü (Yeni Özellik!)</h3>
-            </div>
+<div class="row mt-5">
+    <div class="col-lg-10 mx-auto">
+        <div class="card bg-light">
             <div class="card-body">
+                <h3 class="card-title text-center mb-4">
+                    <i class="fas fa-lightbulb text-warning"></i>
+                    Nasıl Çalışır?
+                </h3>
                 <div class="row">
-                    <div class="col-md-7">
-                        <h4>3. Story: Sınav Modülü</h4>
-                        <p>Kelime Ezberleme Sistemi, bilimsel olarak kanıtlanmış <strong>6 Seferli Öğrenme Algoritması</strong> kullanır. Bu algoritma sayesinde:</p>
-                        <ul>
-                            <li>Her kelimeyi 6 kez doğru bildiğinizde kalıcı olarak öğrenirsiniz.</li>
-                            <li>Tekrarlar 1 gün, 1 hafta, 1 ay, 3 ay, 6 ay ve 1 yıl sonra yapılır.</li>
-                            <li>Yanlış bilinen kelimeler için süreç başa döner.</li>
-                            <li>Sistem, her gün hangi kelimeleri çalışmanız gerektiğini otomatik olarak belirler.</li>
-                        </ul>
-                        <a href="{{ url_for('exam_module') }}" class="btn btn-primary">
-                            <i class="fas fa-info-circle me-2"></i>Tüm Detayları Gör
-                        </a>
+                    <div class="col-md-6">
+                        <p><strong>1. Kelime Ekleyin:</strong> İngilizce-Türkçe kelimelerinizi sisteme ekleyin.</p>
+                        <p><strong>2. Düzenli Çalışın:</strong> Her gün belirlediğiniz sayıda kelime çalışın.</p>
+                        <p><strong>3. Algoritma Takip Edin:</strong> Sistem sizin için en uygun tekrar zamanlarını hesaplar.</p>
                     </div>
-                    <div class="col-md-5">
-                        <div class="algorithm-preview p-3 bg-light rounded">
-                            <h5 class="text-center mb-3">Algoritma Özeti</h5>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>İlk öğrenme</span>
-                                <span class="badge bg-primary">Gün 0</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>1. Tekrar</span>
-                                <span class="badge bg-primary">1 gün sonra</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>2. Tekrar</span>
-                                <span class="badge bg-primary">1 hafta sonra</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>3. Tekrar</span>
-                                <span class="badge bg-primary">1 ay sonra</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>4. Tekrar</span>
-                                <span class="badge bg-primary">3 ay sonra</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>5. Tekrar</span>
-                                <span class="badge bg-primary">6 ay sonra</span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span>6. Tekrar</span>
-                                <span class="badge bg-success">1 yıl sonra / Öğrenildi!</span>
-                            </div>
-                        </div>
+                    <div class="col-md-6">
+                        <p><strong>4. İlerleme Kaydedin:</strong> Doğru bildiğiniz kelimeler otomatik olarak bir sonraki aşamaya geçer.</p>
+                        <p><strong>5. Unutmayın:</strong> 6 kez doğru bildikten sonra kelime "öğrenilmiş" olur.</p>
+                        <p class="text-center mt-3">
+                            <a href="{{ url_for('main.exam_module') }}" class="btn btn-primary">
+                                <i class="fas fa-arrow-right"></i> Detaylı Bilgi
+                            </a>
+                        </p>
                     </div>
                 </div>
             </div>
