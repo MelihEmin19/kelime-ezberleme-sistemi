@@ -8,7 +8,6 @@ Bu proje, kullanıcıların yabancı dil kelime öğrenmesini kolaylaştırmak i
 - Kelime ekleme ve düzenleme
 - Örnek cümle ekleyebilme
 - 6 Seferli Öğrenme Algoritması (1 gün, 1 hafta, 1 ay, 3 ay, 6 ay, 1 yıl tekrar aralıkları)
-- Kelime zorluk derecelendirme (kolay/normal/zor)
 - Detaylı istatistik ve analiz raporları
 - Öğrenme ilerleme grafikleri
 - Çalışma modları
